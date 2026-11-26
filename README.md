@@ -1,6 +1,6 @@
 # Operações — Cremoso
 
-Primeira versão navegável, com identidade visual aprovada, pronta para desenvolvimento em Next.js e implantação na Vercel. O Supabase fornece autenticação e persistência quando configurado. A demonstração está publicada em https://cremoso-operacoes.vercel.app. O Supabase ainda não está conectado; veja DEPLOYMENT.md.
+Primeira versão navegável, com identidade visual aprovada, pronta para desenvolvimento em Next.js e implantação na Vercel. O Supabase fornece autenticação e persistência quando configurado. A versão conectada está publicada em https://cremoso-operacoes.vercel.app. As variáveis do Supabase estão configuradas e a tela de login foi verificada; o teste com uma conta real ainda está pendente. Veja DEPLOYMENT.md.
 
 ## Executar
 
@@ -102,4 +102,5 @@ npm run build
 Os testes de domínio cobrem troca de sabor com total consolidado igual, produtos extras, quantidades inválidas, recebimento duplicado, cadastros livres e empresa vazia. O teste SQL usa PostgreSQL embarcado via PGlite, com um pequeno substituto do `auth.uid()` para executar a migração, validar isolamento entre empresas, permissões de operação, auditoria, imutabilidade da expedição e confirmação única do ERP. Não substitui a validação no projeto Supabase real.
 
 Referências da integração: [Supabase — clientes e autenticação](https://supabase.com/docs/guides/auth/server-side/creating-a-client), [Next.js — implantação](https://nextjs.org/docs/app/getting-started/deploying).
+
 
