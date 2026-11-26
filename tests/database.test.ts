@@ -1,0 +1,51 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { PGlite } from '@electric-sql/pglite';
+
+test('migração e comandos transacionais: isolamento, permissões e auditoria',async()=>{
+  const db=new PGlite();
+  try{
+    await db.exec(`create role anon; create role authenticated; create schema auth; create table auth.users(id uuid primary key,email text); create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;`);
+    const sql=await readFile(new URL('../supabase/migrations/202611260001_workspace.sql',import.meta.url),'utf8');
+    await db.exec(sql.replace('create extension if not exists pgcrypto;',''));
+    const owner='10000000-0000-4000-8000-000000000001';const other='10000000-0000-4000-8000-000000000002';const staff='10000000-0000-4000-8000-000000000003';
+    await db.query('insert into auth.users values ($1,$2),($3,$4),($5,$6)',[owner,'owner@example.com',other,'other@example.com',staff,'staff@example.com']);
+    const asUser=async(id:string)=>{await db.query("select set_config('request.jwt.claim.sub',$1,false)",[id]);};
+    await asUser(owner);
+    const w=(await db.query<{id:string}>('select workspace_create($1) as id',['Minha empresa'])).rows[0].id;
+    const call=async(op:unknown)=>db.query('select workspace_apply($1,$2::jsonb)',[w,JSON.stringify(op)]);
+    await call({type:'save_unit',record:{id:'central',name:'Central',active:true}});
+    await call({type:'save_unit',record:{id:'centro',name:'Centro',active:true}});
+    await call({type:'save_sector',record:{id:'s',name:'Depósito',unitId:'central'}});
+    await call({type:'save_route',record:{id:'r',name:'Reposição personalizada',mode:'separation',printTitle:'Conferir depósito',printer:'Térmica 1'}});
+    await call({type:'save_category',record:{id:'c',name:'Sorvetes'}});
+    await call({type:'save_erp',record:{id:'e',name:'Balde genérico'}});
+    for(const id of ['chocolate','morango'])await call({type:'save_product',record:{id,name:id,category:'Sorvetes',unit:'Balde',content:'12 L',packSize:1,fractions:true,kind:'separation',routeId:'r',sectorId:'s',erpProductId:'e',erpName:'Balde genérico',erpFactor:1,active:true}});
+    const orderId='20000000-0000-4000-8000-000000000001';
+    await call({type:'create_order',order:{id:orderId,sourceId:'central',destinationId:'centro',due:new Date().toISOString(),ready:'16:30',note:'',lines:[{productId:'chocolate',requested:2},{productId:'morango',requested:1}]}});
+    await call({type:'prepare',id:orderId,amounts:{chocolate:2,morango:1}});
+    await call({type:'dispatch',id:orderId,driver:'João',volumes:'2',seals:'001'});
+    await call({type:'save_person',record:{id:staff,name:'Atendente',email:'staff@example.com',role:'attendant',unitIds:['centro']}});
+    await asUser(staff);
+    await assert.rejects(()=>call({type:'save_category',record:{id:'x',name:'Proibido'}}));
+    await assert.rejects(()=>call({type:'prepare',id:orderId,amounts:{chocolate:0,morango:0}}));
+    await call({type:'receive',id:orderId,amounts:{chocolate:1,morango:2},note:'Sabor trocado'});
+    await assert.rejects(()=>call({type:'receive',id:orderId,amounts:{chocolate:1,morango:2},note:'De novo'}));
+    const loaded=(await db.query<{d:{orders:{divergence:boolean;lines:{erpName:string}[]}[];events:unknown[];people:{id:string}[]}}> ('select workspace_get($1) as d',[w])).rows[0].d;
+    assert.equal(loaded.orders[0].divergence,true);assert.equal(loaded.orders[0].lines[0].erpName,'Balde genérico');assert.equal(loaded.people.length,1);
+    await asUser(other);
+    await assert.rejects(()=>db.query('select workspace_get($1)',[w]));
+    assert.deepEqual((await db.query<{d:unknown[]}>('select workspace_list() as d')).rows[0].d,[]);
+    await asUser(owner);
+    await assert.rejects(()=>call({type:'resolve',id:orderId,note:'Eu mesmo despachei'}));
+    await call({type:'mark_erp',id:orderId,reference:'MOGO-123'});
+    await assert.rejects(()=>call({type:'mark_erp',id:orderId,reference:'DUPLICADO'}));
+    const audit=(await db.query<{n:number}>('select count(*)::integer n from operation_audit where workspace_id=$1',[w])).rows[0].n;
+    assert.ok(audit>=10);
+    await db.exec('set role authenticated');
+    await assert.rejects(()=>db.query('select * from operation_workspaces'));
+    await assert.rejects(()=>db.query("delete from operation_audit"));
+    await db.exec('reset role');
+  }finally{await db.close();}
+});
