@@ -38,6 +38,17 @@ Os dados da Cremoso estão exclusivamente em `src/lib/demo.ts`. Uma empresa cria
 - Compartilhamento manual de resumo no WhatsApp.
 - Impressão por setor pelo diálogo do navegador, com folha de estilo para papel de 80 mm. A impressora física ainda precisa ser validada.
 - Tema com nome e cores configuráveis por empresa.
+- Visões por perfil operacional da unidade: a central fornecedora vê a fila de atendimento por destino e setor, enquanto a unidade de vendas vê reposições, recebimentos e contagens. O perfil é configurável em Cadastros → Unidades e, por padrão, é identificado pelas rotinas/pedidos.
+- A central não recebe tarefas de contagem nem ações de nova reposição. Seu histórico de contagens consulta as unidades que ela atende.
+- Contagens podem ser impressas em A4 individualmente ou conforme o filtro do histórico. A impressão das comandas por setor continua em papel térmico de 80 mm.
+
+## Atualização de 27/11: leitura das contagens pela central
+
+Para contas de perfil Atendente na unidade fornecedora, execute também `supabase/migrations/202611270002_supplier_count_read.sql` no SQL Editor do projeto existente. Essa atualização adiciona uma função de consulta e não apaga nem altera os registros de estoque.
+
+Ela permite que uma atendente da central leia as contagens das unidades atendidas, identificadas pelas rotinas e pedidos da mesma empresa. Não concede permissão para registrar ou modificar contagens dessas outras unidades. Administradores e gestores já possuem acesso a essas contagens pelo fluxo existente.
+
+Se a função ainda não foi instalada, a tela apresenta um aviso explícito para a atendente em vez de apresentar uma lista vazia como se não houvesse contagens. A aplicação da atualização no projeto Supabase remoto continua necessária; a migração foi validada em PostgreSQL embarcado nos testes.
 
 ## Conectar ao Supabase
 

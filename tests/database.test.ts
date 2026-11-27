@@ -9,6 +9,7 @@ test('migração e comandos transacionais: isolamento, permissões e auditoria',
     await db.exec(`create role anon; create role authenticated; create schema auth; create table auth.users(id uuid primary key,email text); create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;`);
     const sql=await readFile(new URL('../supabase/migrations/202611260001_workspace.sql',import.meta.url),'utf8');
     await db.exec(sql.replace('create extension if not exists pgcrypto;',''));
+    await db.exec(await readFile(new URL('../supabase/migrations/202611270002_supplier_count_read.sql',import.meta.url),'utf8'));
     const owner='10000000-0000-4000-8000-000000000001';const other='10000000-0000-4000-8000-000000000002';const staff='10000000-0000-4000-8000-000000000003';
     await db.query('insert into auth.users values ($1,$2),($3,$4),($5,$6)',[owner,'owner@example.com',other,'other@example.com',staff,'staff@example.com']);
     const asUser=async(id:string)=>{await db.query("select set_config('request.jwt.claim.sub',$1,false)",[id]);};
@@ -37,6 +38,15 @@ test('migração e comandos transacionais: isolamento, permissões e auditoria',
     await asUser(other);
     await assert.rejects(()=>db.query('select workspace_get($1)',[w]));
     assert.deepEqual((await db.query<{d:unknown[]}>('select workspace_list() as d')).rows[0].d,[]);
+    await asUser(owner);
+    await call({type:'count',count:{unitId:'centro',lines:[{productId:'chocolate',closed:1,opened:0.5,loose:0,condition:''}]}});
+    await call({type:'save_person',record:{id:other,name:'Atendente central',email:'other@example.com',role:'attendant',unitIds:['central']}});
+    await asUser(other);
+    const supplierCounts=(await db.query<{d:{counts:{unitId:string}[]}}>('select workspace_supplier_counts($1) as d',[w])).rows[0].d.counts;
+    assert.equal(supplierCounts.length,1);assert.equal(supplierCounts[0].unitId,'centro');
+    await assert.rejects(()=>call({type:'count',count:{unitId:'centro',lines:[{productId:'chocolate',closed:9,opened:0,loose:0,condition:''}]}}));
+    await asUser(staff);
+    assert.equal((await db.query<{d:{counts:unknown[]}}>('select workspace_supplier_counts($1) as d',[w])).rows[0].d.counts.length,0);
     await asUser(owner);
     await assert.rejects(()=>call({type:'resolve',id:orderId,note:'Eu mesmo despachei'}));
     await call({type:'mark_erp',id:orderId,reference:'MOGO-123'});

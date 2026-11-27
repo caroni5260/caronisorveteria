@@ -1,5 +1,5 @@
 export type Role = 'admin' | 'manager' | 'attendant' | 'kitchen' | 'driver';
-export type Unit = { id: string; name: string; active: boolean };
+export type Unit = { id: string; name: string; active: boolean; operatingProfile?: 'auto' | 'store' | 'supply' };
 export type Sector = { id: string; name: string; unitId: string };
 export type Route = { id: string; name: string; mode: 'separation' | 'production'; printTitle: string; printer: string };
 export type Named = { id: string; name: string };
@@ -11,7 +11,7 @@ export type Order = { id: string; number: string; sourceId: string; destinationI
 export type Count = { id: string; unitId: string; createdAt: string; actor: string; lines: { productId: string; closed: number; opened: number; loose: number; condition: string }[] };
 export type Event = { id: string; at: string; actor: string; action: string; detail: string; unitIds: string[] };
 export type Settings = { brand: string; primary: string; accent: string; whatsapp: string; losses: boolean };
-export type Data = { id: string; name: string; units: Unit[]; referenceUnits?: Unit[]; sectors: Sector[]; routes: Route[]; categories: Named[]; erpProducts: Named[]; products: Product[]; people: Person[]; routines: Routine[]; orders: Order[]; counts: Count[]; events: Event[]; settings: Settings };
+export type Data = { id: string; name: string; units: Unit[]; referenceUnits?: Unit[]; supplierCountsPending?: boolean; sectors: Sector[]; routes: Route[]; categories: Named[]; erpProducts: Named[]; products: Product[]; people: Person[]; routines: Routine[]; orders: Order[]; counts: Count[]; events: Event[]; settings: Settings };
 export type Operation = { type: 'save_unit' | 'save_sector' | 'save_route' | 'save_category' | 'save_erp' | 'save_product' | 'save_person' | 'save_routine' | 'save_settings'; record: unknown } | { type: 'create_order'; order: Order } | { type: 'prepare'; id: string; amounts: Record<string, number> } | { type: 'dispatch'; id: string; volumes: string; seals: string; driver: string } | { type: 'receive'; id: string; amounts: Record<string, number>; note: string } | { type: 'count'; count: Count } | { type: 'resolve'; id: string; note: string } | { type: 'mark_erp'; id: string; reference: string };
 export const roles: Record<Role, string> = { admin: 'Administrador', manager: 'Gestor', attendant: 'Atendente', kitchen: 'Produção', driver: 'Entregador' };
 export const statusLabels = { requested: 'Solicitado', preparing: 'Em preparação', dispatched: 'Em transporte', received: 'Recebido' };

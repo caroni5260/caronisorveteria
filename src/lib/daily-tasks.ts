@@ -1,4 +1,5 @@
 import type { Data, Routine } from './domain';
+import { isSupplyUnit } from './unit-operations';
 
 export type DailyTask = {
   id: string;
@@ -36,7 +37,7 @@ export function localDateTime(date: Date): string {
 
 export function dailyTasks(data: Data, unitId: string, now = new Date()): DailyTask[] {
   const today = dayKey(now);
-  const units = data.units.filter(u => u.active && (!unitId || u.id === unitId));
+  const units = data.units.filter(u => u.active && !isSupplyUnit(data, u.id) && (!unitId || u.id === unitId));
   const availableUnits = new Set(units.map(u => u.id));
   const result: DailyTask[] = [];
   for (const routine of [...data.routines].sort((a, b) => a.cutoff.localeCompare(b.cutoff))) {
