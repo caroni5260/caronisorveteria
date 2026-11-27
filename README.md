@@ -30,6 +30,11 @@ Os dados da Cremoso estão exclusivamente em `src/lib/demo.ts`. Uma empresa cria
 - Confirmação de lançamento manual no ERP com referência e bloqueio de segunda confirmação.
 - Contagem de estoque, histórico por unidade e entradas posteriores à contagem. O consumo entre contagens é desconhecido: essa tela não promete saldo físico em tempo real.
 - Auditoria das ações e exportação JSON.
+- Histórico separado por atividades, pedidos, recebimentos e contagens, com filtro de período e detalhes das contagens.
+- Tarefas de hoje por unidade: uma pendência para cada rotina de reposição e uma contagem diária. O sino mostra a quantidade de tarefas/entregas pendentes.
+- A contagem diária só conclui quando todos os produtos ativos foram contados naquele dia e unidade; contagens parciais complementares são consideradas.
+- Pedidos de reposição são reconhecidos por unidade de origem/destino, dia da solicitação e data/hora da entrega prevista. Um pedido avulso com prazo diferente não conclui a rotina. O formulário permite selecionar uma rotina e preenche os horários correspondentes.
+- A página atualiza o relógio a cada 30 segundos e busca dados novamente a cada minuto ou ao retornar à janela. Os avisos são dentro do sistema aberto, sem notificações push ou envio automático de mensagens.
 - Compartilhamento manual de resumo no WhatsApp.
 - Impressão por setor pelo diálogo do navegador, com folha de estilo para papel de 80 mm. A impressora física ainda precisa ser validada.
 - Tema com nome e cores configuráveis por empresa.
@@ -87,7 +92,7 @@ O modo de demonstração permite avaliar todas as funções como administrador e
 - Upload de fotos, lotes/validade e estoque de produção da loja principal.
 - Assinatura independente de quem entrega e de quem recebe, checklist de lacres na chegada e tratamento estruturado de recusas. Nesta versão a retirada identifica o entregador, mas não exige que ele autentique pessoalmente o recebimento dos volumes.
 - Recuperação de senha, convite por e-mail e experiência específica por setor/perfil.
-- Notificações por horário, seleção automática da próxima rotina e quantidade sugerida. Os horários cadastrados orientam o pedido; o operador confirma a data e o prazo.
+- Notificações externas/push, quantidade sugerida e frequência configurável de contagens. Os horários das rotinas e o calendário diário usam o fuso do dispositivo, informado no painel de tarefas; os avisos internos de pendências já estão implementados.
 - Teste com duas contas reais, o projeto Supabase remoto, aparelhos da equipe e a impressora térmica da loja antes de liberar uso operacional.
 - Perdas permanece fora do fluxo até verificar a cobertura do Mogo.
 
