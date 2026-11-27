@@ -25,3 +25,12 @@ Não compartilhe senha do banco, chave secreta nem service_role. A URL e a chave
 
 As instruções completas e as limitações desta versão estão em README.md.
 
+## Atualização de 27/11/2026
+
+- Publicada a visão de central fornecedora, com fila por destino/setor, histórico e impressão A4 das contagens.
+- A central não mostra tarefas próprias de contagem/reposição. O perfil é configurável por unidade; a identificação automática usa as rotinas/pedidos existentes.
+- Deploy `dpl_3NmEKW7UaE3bkwe7QaDZubaZwtcT` confirmado READY no endereço habitual.
+- 19 testes passaram e a compilação de produção foi concluída. A navegação foi verificada em um ambiente local de demonstração isolado. Não foram criados registros fictícios no banco remoto.
+- A migração `202611270002_supplier_count_read.sql` foi testada localmente e ainda precisa ser aplicada no projeto Supabase remoto para contas Atendente lerem contagens das unidades atendidas. A aplicação exibe um aviso caso essa função não esteja disponível. Administradores e gestores continuam com a leitura existente.
+- A impressão A4 foi implementada; a validação em impressora física ainda depende do equipamento da loja.
+
