@@ -12,7 +12,7 @@ Projeto Supabase: `axntuqrzzqjspjyejowr`.
 
 A função `workspace_list` existe e negou corretamente uma chamada anônima. Ainda falta validar uma sessão real e os fluxos autenticados no banco remoto. Nenhuma senha de usuário foi solicitada ou configurada pelo agente.
 
-GitHub: o commit inicial está disponível localmente, mas o envio ao repositório `caroni5260/caronisorveteria` foi recusado por falta de acesso de escrita para `paloma-amaral`. A publicação atual usa a CLI da Vercel e não depende desse envio.
+GitHub: código enviado à branch `main` de `caroni5260/caronisorveteria` em 26/11/2026. O acesso de escrita para `paloma-amaral` foi confirmado. A tentativa de vinculação automática pela Vercel ainda não foi concluída; a publicação atual usa a CLI da Vercel e continua disponível independentemente dessa integração.
 
 ## Próximo passo: Supabase
 
@@ -24,3 +24,4 @@ GitHub: o commit inicial está disponível localmente, mas o envio ao repositór
 Não compartilhe senha do banco, chave secreta nem service_role. A URL e a chave publicável são suficientes para configurar o frontend; elas não permitem que o agente execute a migração SQL remotamente.
 
 As instruções completas e as limitações desta versão estão em README.md.
+
